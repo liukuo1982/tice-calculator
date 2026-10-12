@@ -1,0 +1,21 @@
+{
+  "name": "四年级体测得分计算器",
+  "short_name": "体测计算器",
+  "start_url": "./tice_calculator.html",
+  "display": "standalone",
+  "background_color": "#764ba2",
+  "theme_color": "#667eea",
+  "description": "北京小学四年级体测得分计算器（依据《国家学生体质健康标准（2014年修订）》）",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

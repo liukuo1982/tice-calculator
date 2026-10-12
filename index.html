@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>体测得分计算器（四/六/八年级）</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:16px}
+  .container{max-width:680px;margin:0 auto}
+  .card{background:#fff;border-radius:16px;padding:24px 20px;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+  h1{text-align:center;color:#fff;font-size:22px;margin-bottom:4px;text-shadow:0 2px 8px rgba(0,0,0,.3)}
+  .subtitle{text-align:center;color:rgba(255,255,255,.85);font-size:12px;margin-bottom:16px}
+  .toggle-row{display:flex;gap:8px;margin-bottom:16px}
+  .toggle-row button{flex:1;padding:10px 4px;border:2px solid #e0e0e0;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:#fff;transition:all .2s}
+  .toggle-row button.active{border-color:#764ba2;background:#f3e8ff;color:#764ba2}
+  .input-group{margin-bottom:12px}
+  .input-group label{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#555;margin-bottom:4px;font-weight:600}
+  .input-group label .unit{color:#999;font-weight:400;font-size:11px}
+  .input-group input{width:100%;padding:9px 12px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px}
+  .input-group input:focus{outline:none;border-color:#764ba2}
+  .input-row{display:flex;gap:10px}
+  .input-row .input-group{flex:1}
+  .time-row{display:flex;gap:10px;align-items:flex-end}
+  .time-row .input-group{flex:1}
+  .btn-calc{width:100%;padding:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer;transition:transform .15s;margin-top:8px}
+  .btn-calc:hover{transform:translateY(-2px)}
+  .result-card{display:none}
+  .total-score{text-align:center;padding:12px 0}
+  .total-score .score{font-size:44px;font-weight:800;color:#764ba2;line-height:1.2}
+  .total-score .score120{font-size:18px;color:#999;font-weight:600}
+  .total-score .grade{display:inline-block;padding:5px 18px;border-radius:20px;font-size:15px;font-weight:700;margin-top:6px}
+  .grade-excellent{background:#e8f5e9;color:#2e7d32}
+  .grade-good{background:#e3f2fd;color:#1565c0}
+  .grade-pass{background:#fff9c4;color:#f57f17}
+  .grade-fail{background:#ffebee;color:#c62828}
+  .proc-box{text-align:center;margin:10px 0;padding:10px;background:#f3e8ff;border-radius:10px}
+  .proc-box .label{font-size:12px;color:#764ba2;font-weight:600}
+  .proc-box .val{font-size:28px;font-weight:800;color:#764ba2}
+  .proc-box .desc{font-size:11px;color:#999}
+  .detail-table{width:100%;border-collapse:collapse;margin-top:12px}
+  .detail-table th,.detail-table td{padding:7px 10px;text-align:center;border-bottom:1px solid #f0f0f0;font-size:13px}
+  .detail-table th{color:#999;font-weight:600;font-size:11px}
+  .detail-table td.sc{font-weight:700;color:#764ba2}
+  .note{font-size:11px;color:#aaa;margin-top:10px;line-height:1.6}
+  .src{font-size:10px;color:#bbb;margin-top:6px;padding:6px;background:#f9f9f9;border-radius:6px;line-height:1.5}
+  .fields{display:none}
+  .fields.active{display:block}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🏃 体测得分计算器</h1>
+  <p class="subtitle">北京市 ·《国家学生体质健康标准（2014年修订）》</p>
+  <div class="card">
+    <div class="toggle-row">
+      <button class="active" onclick="setGrade('4')">四年级</button>
+      <button onclick="setGrade('6')">六年级</button>
+      <button onclick="setGrade('8')">八年级</button>
+    </div>
+    <div class="toggle-row">
+      <button id="g-boy" class="active" onclick="setGender('boy')">👦 男生</button>
+      <button id="g-girl" onclick="setGender('girl')">👧 女生</button>
+    </div>
+    <div class="input-row">
+      <div class="input-group">
+        <label>身高 <span class="unit">米</span></label>
+        <input type="number" id="height" step="0.01" value="1.45">
+      </div>
+      <div class="input-group">
+        <label>体重 <span class="unit">公斤</span></label>
+        <input type="number" id="weight" step="0.1" value="38">
+      </div>
+    </div>
+    <div class="input-group">
+      <label>肺活量 <span class="unit">毫升</span></label>
+      <input type="number" id="vl" value="2200">
+    </div>
+    <div class="input-group">
+      <label>50米跑 <span class="unit">秒</span></label>
+      <input type="number" id="run50" step="0.1" value="9.2">
+    </div>
+    <div class="input-group">
+      <label>坐位体前屈 <span class="unit">厘米</span></label>
+      <input type="number" id="sitReach" step="0.1" value="10.5">
+    </div>
+    <div class="fields" id="f-jump">
+      <div class="input-group">
+        <label>一分钟跳绳 <span class="unit">次</span></label>
+        <input type="number" id="jump" value="145">
+      </div>
+    </div>
+    <div class="fields" id="f-sitUp">
+      <div class="input-group">
+        <label>一分钟仰卧起坐 <span class="unit">次</span></label>
+        <input type="number" id="sitUp" value="38">
+      </div>
+    </div>
+    <div class="fields" id="f-run50x8">
+      <div class="input-group">
+        <label>50米×8往返跑 <span class="unit">输入格式：1分30秒 → 1和30</span></label>
+        <div class="time-row">
+          <div class="input-group"><label>分</label><input type="number" id="run50x8_m" value="1"></div>
+          <div class="input-group"><label>秒</label><input type="number" id="run50x8_s" value="30"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fields" id="f-longJump">
+      <div class="input-group">
+        <label>立定跳远 <span class="unit">厘米</span></label>
+        <input type="number" id="longJump" value="200">
+      </div>
+    </div>
+    <div class="fields" id="f-pullUp">
+      <div class="input-group">
+        <label id="pullUpLabel">引体向上 <span class="unit">次</span></label>
+        <input type="number" id="pullUp" value="10">
+      </div>
+    </div>
+    <div class="fields" id="f-runLong">
+      <div class="input-group">
+        <label id="runLongLabel">1000米跑 <span class="unit">输入格式：3分50秒 → 3和50</span></label>
+        <div class="time-row">
+          <div class="input-group"><label>分</label><input type="number" id="runLong_m" value="3"></div>
+          <div class="input-group"><label>秒</label><input type="number" id="runLong_s" value="50"></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-calc" onclick="calculate()">开始计算</button>
+  </div>
+  <div class="card result-card" id="resultCard">
+    <div class="total-score">
+      <div class="score" id="totalScore">--</div>
+      <div class="score120" id="total120"></div>
+      <div class="grade" id="gradeBadge">--</div>
+    </div>
+    <div class="proc-box">
+      <div class="label">北京中考体育过程性考核赋分</div>
+      <div class="val" id="procScore">--</div>
+      <div class="desc">满分10分</div>
+    </div>
+    <table class="detail-table">
+      <thead><tr><th>项目</th><th>成绩</th><th>得分</th><th>权重</th><th>加权分</th></tr></thead>
+      <tbody id="detailBody"></tbody>
+    </table>
+    <p class="note" id="noteText"></p>
+    <div class="src">数据来源：首都教育发布的《国家学生体质健康标准（2014年修订）》评分表</div>
+  </div>
+</div>
+<script>
+var D={"scores": {"boy": {"vl": {"4": [[100, 2600], [95, 2500], [90, 2400], [85, 2150], [80, 1900], [78, 1820], [76, 1740], [74, 1660], [72, 1580], [70, 1500], [68, 1420], [66, 1340], [64, 1260], [62, 1180], [60, 1100], [50, 1030], [40, 960], [30, 890], [20, 820], [10, 750]], "6": [[100, 3200], [95, 3100], [90, 3000], [85, 2750], [80, 2500], [78, 2400], [76, 2300], [74, 2200], [72, 2100], [70, 2000], [68, 1900], [66, 1800], [64, 1700], [62, 1600], [60, 1500], [50, 1410], [40, 1320], [30, 1230], [20, 1140], [10, 1050]], "8": [[100, 3940], [95, 3820], [90, 3700], [85, 3450], [80, 3200], [78, 3080], [76, 2960], [74, 2840], [72, 2720], [70, 2600], [68, 2480], [66, 2360], [64, 2240], [62, 2120], [60, 2000], [50, 1890], [40, 1780], [30, 1670], [20, 1560], [10, 1450]]}, "run50": {"4": [[100, 8.7], [95, 8.8], [90, 8.9], [85, 9.0], [80, 9.1], [78, 9.3], [76, 9.5], [74, 9.7], [72, 9.9], [70, 10.1], [68, 10.3], [66, 10.5], [64, 10.7], [62, 10.9], [60, 11.1], [50, 11.3], [40, 11.5], [30, 11.7], [20, 11.9], [10, 12.1]], "6": [[100, 8.2], [95, 8.3], [90, 8.4], [85, 8.5], [80, 8.6], [78, 8.8], [76, 9.0], [74, 9.2], [72, 9.4], [70, 9.6], [68, 9.8], [66, 10.0], [64, 10.2], [62, 10.4], [60, 10.6], [50, 10.8], [40, 11.0], [30, 11.2], [20, 11.4], [10, 11.6]], "8": [[100, 7.5], [95, 7.6], [90, 7.7], [85, 7.8], [80, 7.9], [78, 8.1], [76, 8.3], [74, 8.5], [72, 8.7], [70, 8.9], [68, 9.1], [66, 9.3], [64, 9.5], [62, 9.7], [60, 9.9], [50, 10.1], [40, 10.3], [30, 10.5], [20, 10.7], [10, 10.9]]}, "sitReach": {"4": [[100, 16.4], [95, 15.0], [90, 13.6], [85, 11.7], [80, 9.8], [78, 8.6], [76, 7.4], [74, 6.2], [72, 5.0], [70, 3.8], [68, 2.6], [66, 1.4], [64, 0.2], [62, -1.0], [60, -2.2], [50, -3.2], [40, -4.2], [30, -5.2], [20, -6.2], [10, -7.2]], "6": [[100, 16.6], [95, 15.3], [90, 14.0], [85, 11.5], [80, 9.0], [78, 7.7], [76, 6.4], [74, 5.1], [72, 3.8], [70, 2.5], [68, 1.2], [66, -0.1], [64, -1.4], [62, -2.7], [60, -4.0], [50, -5.0], [40, -6.0], [30, -7.0], [20, -8.0], [10, -9.0]], "8": [[100, 19.6], [95, 17.7], [90, 15.8], [85, 13.7], [80, 11.6], [78, 10.3], [76, 9.0], [74, 7.7], [72, 6.4], [70, 5.1], [68, 3.8], [66, 2.5], [64, 1.2], [62, -0.1], [60, -1.4], [50, -2.6], [40, -3.8], [30, -5.0], [20, -6.2], [10, -7.4]]}, "jump": {"4": [[100, 137], [95, 132], [90, 127], [85, 121], [80, 115], [78, 108], [76, 101], [74, 94], [72, 87], [70, 80], [68, 73], [66, 66], [64, 59], [62, 52], [60, 45], [50, 42], [40, 39], [30, 36], [20, 33], [10, 30]], "6": [[100, 157], [95, 152], [90, 147], [85, 141], [80, 135], [78, 128], [76, 121], [74, 114], [72, 107], [70, 100], [68, 93], [66, 86], [64, 79], [62, 72], [60, 65], [50, 62], [40, 59], [30, 56], [20, 53], [10, 50]]}, "sitUp": {"4": [[100, 49], [95, 46], [90, 43], [85, 40], [80, 37], [78, 35], [76, 33], [74, 31], [72, 29], [70, 27], [68, 25], [66, 23], [64, 21], [62, 19], [60, 17], [50, 15], [40, 13], [30, 11], [20, 9], [10, 7]], "6": [[100, 51], [95, 48], [90, 45], [85, 42], [80, 39], [78, 37], [76, 35], [74, 33], [72, 31], [70, 29], [68, 27], [66, 25], [64, 23], [62, 21], [60, 19], [50, 17], [40, 15], [30, 13], [20, 11], [10, 9]], "8": [[100, 51], [95, 49], [90, 47], [85, 44], [80, 41], [78, 39], [76, 37], [74, 35], [72, 33], [70, 31], [68, 29], [66, 27], [64, 25], [62, 23], [60, 21], [50, 19], [40, 17], [30, 15], [20, 13], [10, 11]]}, "pullUp": {"8": [[100, 14], [95, 13], [90, 12], [85, 11], [80, 10], [78, 9], [76, 8], [74, 7], [72, 6], [70, 5], [68, 4], [66, 3], [64, 2], [62, 1], [60, 1], [50, 1], [40, 0], [30, 0], [20, 0], [10, 0]]}, "longJump": {"8": [[100, 240], [95, 233], [90, 226], [85, 218], [80, 210], [78, 206], [76, 202], [74, 198], [72, 194], [70, 190], [68, 186], [66, 182], [64, 178], [62, 174], [60, 170], [50, 165], [40, 160], [30, 155], [20, 150], [10, 145]]}, "run50x8": {"6": [[100, 90], [95, 93], [90, 96], [85, 99], [80, 102], [78, 105], [76, 108], [74, 111], [72, 114], [70, 117], [68, 120], [66, 123], [64, 126], [62, 129], [60, 132], [50, 136], [40, 140], [30, 144], [20, 148], [10, 152]]}, "run1000": {"8": [[100, 230], [95, 235], [90, 240], [85, 247], [80, 255], [78, 260], [76, 265], [74, 270], [72, 275], [70, 280], [68, 285], [66, 290], [64, 295], [62, 300], [60, 305], [50, 325], [40, 345], [30, 365], [20, 385], [10, 405]]}}, "girl": {"vl": {"4": [[100, 2000], [95, 1900], [90, 1800], [85, 1700], [80, 1600], [78, 1530], [76, 1460], [74, 1390], [72, 1320], [70, 1250], [68, 1180], [66, 1110], [64, 1040], [62, 970], [60, 900], [50, 880], [40, 860], [30, 840], [20, 820], [10, 800]], "6": [[100, 2500], [95, 2400], [90, 2300], [85, 2200], [80, 2100], [78, 2010], [76, 1920], [74, 1830], [72, 1740], [70, 1650], [68, 1560], [66, 1470], [64, 1380], [62, 1290], [60, 1200], [50, 1170], [40, 1140], [30, 1110], [20, 1080], [10, 1050]], "8": [[100, 2900], [95, 2850], [90, 2800], [85, 2650], [80, 2500], [78, 2400], [76, 2300], [74, 2200], [72, 2100], [70, 2000], [68, 1900], [66, 1800], [64, 1700], [62, 1600], [60, 1500], [50, 1460], [40, 1420], [30, 1380], [20, 1340], [10, 1300]]}, "run50": {"4": [[100, 8.7], [95, 8.8], [90, 8.9], [85, 9.2], [80, 9.5], [78, 9.7], [76, 9.9], [74, 10.1], [72, 10.3], [70, 10.5], [68, 10.7], [66, 10.9], [64, 11.1], [62, 11.3], [60, 11.5], [50, 11.7], [40, 11.9], [30, 12.1], [20, 12.3], [10, 12.5]], "6": [[100, 8.2], [95, 8.3], [90, 8.4], [85, 8.7], [80, 9.0], [78, 9.2], [76, 9.4], [74, 9.6], [72, 9.8], [70, 10.0], [68, 10.2], [66, 10.4], [64, 10.6], [62, 10.8], [60, 11.0], [50, 11.2], [40, 11.4], [30, 11.6], [20, 11.8], [10, 12.0]], "8": [[100, 8.0], [95, 8.1], [90, 8.2], [85, 8.5], [80, 8.8], [78, 9.0], [76, 9.2], [74, 9.4], [72, 9.6], [70, 9.8], [68, 10.0], [66, 10.2], [64, 10.4], [62, 10.6], [60, 10.8], [50, 11.0], [40, 11.2], [30, 11.4], [20, 11.6], [10, 11.8]]}, "sitReach": {"4": [[100, 19.5], [95, 18.1], [90, 16.9], [85, 15.0], [80, 13.1], [78, 12.0], [76, 10.9], [74, 9.8], [72, 8.7], [70, 7.6], [68, 6.5], [66, 5.4], [64, 4.3], [62, 3.2], [60, 2.1], [50, 1.3], [40, 0.5], [30, -0.3], [20, -1.1], [10, -1.9]], "6": [[100, 19.9], [95, 18.7], [90, 17.5], [85, 15.2], [80, 12.9], [78, 11.8], [76, 10.7], [74, 9.6], [72, 8.5], [70, 7.4], [68, 6.3], [66, 5.2], [64, 4.1], [62, 3.0], [60, 1.9], [50, 1.1], [40, 0.3], [30, -0.5], [20, -1.3], [10, -2.1]], "8": [[100, 22.7], [95, 21.0], [90, 19.3], [85, 17.6], [80, 15.9], [78, 14.6], [76, 13.3], [74, 12.0], [72, 10.7], [70, 9.4], [68, 8.1], [66, 6.8], [64, 5.5], [62, 4.2], [60, 2.9], [50, 2.1], [40, 1.3], [30, 0.5], [20, -0.3], [10, -1.1]]}, "jump": {"4": [[100, 149], [95, 142], [90, 135], [85, 127], [80, 119], [78, 112], [76, 105], [74, 98], [72, 91], [70, 84], [68, 77], [66, 70], [64, 63], [62, 56], [60, 49], [50, 46], [40, 43], [30, 40], [20, 37], [10, 34]], "6": [[100, 166], [95, 159], [90, 152], [85, 144], [80, 136], [78, 129], [76, 122], [74, 115], [72, 108], [70, 101], [68, 96], [66, 87], [64, 80], [62, 73], [60, 66], [50, 63], [40, 60], [30, 57], [20, 54], [10, 51]]}, "sitUp": {"4": [[100, 47], [95, 45], [90, 43], [85, 40], [80, 37], [78, 35], [76, 33], [74, 31], [72, 29], [70, 27], [68, 25], [66, 23], [64, 21], [62, 19], [60, 17], [50, 15], [40, 13], [30, 11], [20, 9], [10, 7]], "6": [[100, 49], [95, 47], [90, 45], [85, 42], [80, 39], [78, 37], [76, 35], [74, 33], [72, 31], [70, 29], [68, 27], [66, 25], [64, 23], [62, 21], [60, 19], [50, 17], [40, 15], [30, 13], [20, 11], [10, 9]], "8": [[100, 51], [95, 49], [90, 47], [85, 44], [80, 41], [78, 39], [76, 37], [74, 35], [72, 33], [70, 31], [68, 29], [66, 27], [64, 25], [62, 23], [60, 21], [50, 19], [40, 17], [30, 15], [20, 13], [10, 11]]}, "longJump": {"8": [[100, 200], [95, 194], [90, 188], [85, 181], [80, 174], [78, 171], [76, 168], [74, 165], [72, 162], [70, 159], [68, 156], [66, 153], [64, 150], [62, 147], [60, 144], [50, 139], [40, 134], [30, 129], [20, 124], [10, 119]]}, "run50x8": {"6": [[100, 97], [95, 100], [90, 103], [85, 106], [80, 109], [78, 112], [76, 115], [74, 118], [72, 121], [70, 124], [68, 127], [66, 130], [64, 133], [62, 136], [60, 139], [50, 143], [40, 147], [30, 151], [20, 155], [10, 159]]}, "run800": {"8": [[100, 210], [95, 217], [90, 224], [85, 232], [80, 240], [78, 245], [76, 250], [74, 255], [72, 260], [70, 265], [68, 270], [66, 275], [64, 280], [62, 285], [60, 290], [50, 300], [40, 310], [30, 320], [20, 330], [10, 340]]}}}, "bmi": {"boy": {"4": {"normalLow": 14.2, "normalHigh": 20.1, "overHigh": 22.6}, "6": {"normalLow": 14.7, "normalHigh": 21.8, "overHigh": 24.5}, "8": {"normalLow": 15.7, "normalHigh": 22.5, "overHigh": 25.2}}, "girl": {"4": {"normalLow": 13.7, "normalHigh": 19.4, "overHigh": 22.0}, "6": {"normalLow": 14.2, "normalHigh": 20.8, "overHigh": 23.6}, "8": {"normalLow": 15.3, "normalHigh": 22.2, "overHigh": 24.8}}}, "weights": {"4": {"bmi": 0.15, "vl": 0.15, "run50": 0.2, "sitReach": 0.2, "jump": 0.2, "sitUp": 0.1}, "6": {"bmi": 0.15, "vl": 0.15, "run50": 0.2, "sitReach": 0.1, "jump": 0.1, "sitUp": 0.2, "run50x8": 0.1}, "8": {"bmi": 0.15, "vl": 0.15, "run50": 0.2, "sitReach": 0.1, "longJump": 0.1, "pullUp": 0.1, "run1000": 0.2}}, "jumpBase": {"boy": {"4": 137, "6": 157}, "girl": {"4": 149, "6": 166}}, "jumpFull": {"boy": {"4": 177, "6": 197}, "girl": {"4": 189, "6": 206}}};
+var grade='4',gender='boy';
+
+function setGrade(g){
+  grade=g;
+  document.querySelectorAll('.toggle-row')[0].querySelectorAll('button').forEach((b,i)=>{
+    b.classList.toggle('active',b.textContent.includes(['四','六','八'][parseInt(g/2-2)]));
+  });
+  showFields();
+}
+function setGender(g){
+  gender=g;
+  document.getElementById('g-boy').classList.toggle('active',g==='boy');
+  document.getElementById('g-girl').classList.toggle('active',g==='girl');
+  showFields();
+}
+function showFields(){
+  ['f-jump','f-sitUp','f-run50x8','f-longJump','f-pullUp','f-runLong'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  if(grade==='4'){document.getElementById('f-jump').classList.add('active');document.getElementById('f-sitUp').classList.add('active');}
+  else if(grade==='6'){document.getElementById('f-jump').classList.add('active');document.getElementById('f-sitUp').classList.add('active');document.getElementById('f-run50x8').classList.add('active');}
+  else{document.getElementById('f-longJump').classList.add('active');document.getElementById('f-pullUp').classList.add('active');document.getElementById('f-runLong').classList.add('active');
+    if(gender==='boy'){document.getElementById('pullUpLabel').innerHTML='引体向上 <span class="unit">次</span>';document.getElementById('runLongLabel').innerHTML='1000米跑 <span class="unit">分+秒</span>';}
+    else{document.getElementById('pullUpLabel').innerHTML='一分钟仰卧起坐 <span class="unit">次</span>';document.getElementById('runLongLabel').innerHTML='800米跑 <span class="unit">分+秒</span>';}
+  }
+}
+showFields();
+
+function getScore(val,table,isLow){
+  if(isNaN(val))return null;
+  for(var i=0;i<table.length;i++){
+    if(isLow){if(val<=table[i][1])return table[i][0];}
+    else{if(val>=table[i][1])return table[i][0];}
+  }
+  return 0;
+}
+function bmiScore(h,w){
+  if(!h||!w)return null;
+  var bmi=w/(h*h);
+  var s=D.bmi[gender][grade];
+  if(bmi>=s.normalLow&&bmi<=s.normalHigh)return 100;
+  if(bmi<s.normalLow)return 80;
+  if(bmi<=s.overHigh)return 80;
+  return 60;
+}
+function calcJumpAdd(cnt){
+  if(grade==='8')return 0;
+  var base=D.jumpBase[gender][grade];
+  if(cnt<=base)return 0;
+  return Math.min(Math.floor((cnt-base)/2),20);
+}
+function getProc(t){
+  if(t>=80)return 10;if(t>=75)return 8.5;if(t>=70)return 8;if(t>=65)return 7.5;if(t>=60)return 7;return 5.5;
+}
+function calculate(){
+  var h=parseFloat(document.getElementById('height').value);
+  var w=parseFloat(document.getElementById('weight').value);
+  var g=gender;
+  var S=D.scores[g];
+  var W=D.weights[grade];
+  var bmi=bmiScore(h,w);
+  var bmiVal=h&&w?w/(h*h):null;
+  var items=[];
+  items.push({name:'BMI',raw:bmiVal?bmiVal.toFixed(1):'--',score:bmi,weight:W.bmi});
+  items.push({name:'肺活量',raw:val('vl'),score:getScore(val('vl'),S.vl[grade],false),weight:W.vl});
+  items.push({name:'50米跑',raw:val('run50'),score:getScore(val('run50'),S.run50[grade],true),weight:W.run50});
+  items.push({name:'坐位体前屈',raw:val('sitReach'),score:getScore(val('sitReach'),S.sitReach[grade],false),weight:W.sitReach});
+
+  var addStr='';
+  if(grade==='4'||grade==='6'){
+    var j=val('jump');
+    var su=val('sitUp');
+    items.push({name:'一分钟跳绳',raw:j,score:getScore(j,S.jump[grade],false),weight:W.jump});
+    items.push({name:'一分钟仰卧起坐',raw:su,score:getScore(su,S.sitUp[grade],false),weight:W.sitUp});
+    var ja=calcJumpAdd(j);
+    if(ja>0)items.push({name:'跳绳附加分',raw:'+'+ja,score:ja,weight:0,bonus:true});
+    addStr='跳绳附加分：每多跳2次加1分，最高20分';
+  } else if(grade==='6'){
+    // 50m×8 handled separately below
+  }
+
+  if(grade==='6'){
+    var rm=parseInt(document.getElementById('run50x8_m').value)||0;
+    var rs=parseInt(document.getElementById('run50x8_s').value)||0;
+    var rsec=rm*60+rs;
+    items.push({name:'50米×8往返跑',raw:rm+'\''+rs+'"',score:getScore(rsec,S.run50x8[grade],true),weight:W.run50x8});
+  }
+
+  if(grade==='8'){
+    var lj=val('longJump');
+    items.push({name:'立定跳远',raw:lj,score:getScore(lj,S.longJump[grade],false),weight:W.longJump});
+    if(g==='boy'){
+      var pu=val('pullUp');
+      items.push({name:'引体向上',raw:pu,score:getScore(pu,S.pullUp[grade],false),weight:W.pullUp});
+      var rm2=parseInt(document.getElementById('runLong_m').value)||0;
+      var rs2=parseInt(document.getElementById('runLong_s').value)||0;
+      var rsec2=rm2*60+rs2;
+      items.push({name:'1000米跑',raw:rm2+'\''+rs2+'"',score:getScore(rsec2,S.run1000[grade],true),weight:W.run1000});
+    }else{
+      var su8=val('pullUp');
+      items.push({name:'一分钟仰卧起坐',raw:su8,score:getScore(su8,S.sitUp[grade],false),weight:W.pullUp});
+      var rm3=parseInt(document.getElementById('runLong_m').value)||0;
+      var rs3=parseInt(document.getElementById('runLong_s').value)||0;
+      var rsec3=rm3*60+rs3;
+      items.push({name:'800米跑',raw:rm3+'\''+rs3+'"',score:getScore(rsec3,S.run800[grade],true),weight:W.run1000});
+    }
+    addStr='八年级加分项：引体向上/仰卧起坐（最高10分）+ 1000米/800米跑（最高10分）';
+  }
+
+  var total100=0,totalAdd=0,html='';
+  for(var i=0;i<items.length;i++){
+    var it=items[i];
+    var s=it.score!==null?it.score:0;
+    if(it.bonus){totalAdd+=s;}
+    else{total100+=s*it.weight;}
+    html+='<tr><td>'+it.name+'</td><td>'+it.raw+'</td><td class="sc">'+(it.score!==null?it.score:'--')+'</td><td>'+(it.bonus?'-':(it.weight*100)+'%')+'</td><td>'+(it.bonus?s:(s*it.weight).toFixed(1))+'</td></tr>';
+  }
+  var total120=total100+totalAdd;
+  var proc=getProc(total100);
+  document.getElementById('detailBody').innerHTML=html;
+  document.getElementById('totalScore').textContent=total100.toFixed(1);
+  document.getElementById('total120').textContent='含附加分：'+total120.toFixed(1)+' / 120分';
+  document.getElementById('procScore').textContent=proc+' 分';
+  var badge=document.getElementById('gradeBadge');
+  if(total100>=80){badge.className='grade grade-excellent';badge.textContent='优秀 ⭐';}
+  else if(total100>=75){badge.className='grade grade-good';badge.textContent='良好 👍';}
+  else if(total100>=60){badge.className='grade grade-pass';badge.textContent='及格 ✅';}
+  else{badge.className='grade grade-fail';badge.textContent='不及格 ❌';}
+  var wStr=grade==='4'?'BMI15%·肺活量15%·50米20%·体前屈20%·跳绳20%·仰卧起坐10%':grade==='6'?'BMI15%·肺活量15%·50米20%·体前屈10%·跳绳10%·仰卧起坐20%·往返跑10%':'BMI15%·肺活量15%·50米20%·体前屈10%·跳远10%·引体/仰卧10%·长跑20%';
+  document.getElementById('noteText').innerHTML='标准分满分100分+附加分。权重：'+wStr+'<br>等级：优秀≥80 · 良好75-79.9 · 及格60-74.9 · 不及格<60'+(addStr?'<br>'+addStr:'');
+  document.getElementById('resultCard').style.display='block';
+}
+function val(id){return parseFloat(document.getElementById(id).value);}
+</script>
+</body>
+</html>
