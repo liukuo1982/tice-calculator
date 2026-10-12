@@ -16,3 +16,4 @@
 ### GitHub Pages
 1. 推送到 GitHub 仓库
 2. Settings → Pages → Source: main branch
+"# tice-calculator" 
