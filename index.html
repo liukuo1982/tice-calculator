@@ -265,15 +265,15 @@ function calculate(){
     html+='<tr><td>'+it.name+'</td><td>'+it.raw+'</td><td class="sc">'+(it.score!==null?it.score:'--')+'</td><td>'+(it.bonus?'-':(it.weight*100)+'%')+'</td><td>'+(it.bonus?s:(s*it.weight).toFixed(1))+'</td></tr>';
   }
   var total120=total100+totalAdd;
-  var proc=getProc(total100);
+  var proc=getProc(total120);
   document.getElementById('detailBody').innerHTML=html;
   document.getElementById('totalScore').textContent=total100.toFixed(1);
   document.getElementById('total120').textContent='含附加分：'+total120.toFixed(1)+' / 120分';
   document.getElementById('procScore').textContent=proc+' 分';
   var badge=document.getElementById('gradeBadge');
-  if(total100>=80){badge.className='grade grade-excellent';badge.textContent='优秀 ⭐';}
-  else if(total100>=75){badge.className='grade grade-good';badge.textContent='良好 👍';}
-  else if(total100>=60){badge.className='grade grade-pass';badge.textContent='及格 ✅';}
+  if(total120>=80){badge.className='grade grade-excellent';badge.textContent='优秀 ⭐';}
+  else if(total120>=75){badge.className='grade grade-good';badge.textContent='良好 👍';}
+  else if(total120>=60){badge.className='grade grade-pass';badge.textContent='及格 ✅';}
   else{badge.className='grade grade-fail';badge.textContent='不及格 ❌';}
   var wStr=grade==='4'?'BMI15%·肺活量15%·50米20%·体前屈20%·跳绳20%·仰卧起坐10%':grade==='6'?'BMI15%·肺活量15%·50米20%·体前屈10%·跳绳10%·仰卧起坐20%·往返跑10%':'BMI15%·肺活量15%·50米20%·体前屈10%·跳远10%·引体/仰卧10%·长跑20%';
   document.getElementById('noteText').innerHTML='标准分满分100分+附加分。权重：'+wStr+'<br>等级：优秀≥80 · 良好75-79.9 · 及格60-74.9 · 不及格<60'+(addStr?'<br>'+addStr:'');
